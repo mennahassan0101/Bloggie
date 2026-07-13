@@ -12,7 +12,7 @@ A Blog Application with a RESTful API built in **PHP Laravel** and a UI built in
 - All API endpoints except login/signup are protected with authentication
 - Image uploads stored using Laravel's filesystem (local disk)
 
-> **Deviation from spec:** the original requirement specifies JWT. This project uses **Laravel Sanctum** instead — Laravel's built-in token-based API auth package. It achieves the same result (stateless, bearer-token-protected endpoints) with less setup overhead.
+
 
 **2. CRUD Posts**
 - Post fields: `title`, `body`, `author` (reference to User), `tags`, `comments`
@@ -48,7 +48,7 @@ A Blog Application with a RESTful API built in **PHP Laravel** and a UI built in
 | Frontend       | React (Vite), Axios, React Router    |
 | Local Dev Env  | Laragon                              |
 
-> **Deviation from spec:** the requirements doc states the system should run via Docker Compose. This project is currently developed and run locally with Laragon (PHP/MySQL) and the Vite dev server, without Docker.
+
 
 ## Project Structure
 
