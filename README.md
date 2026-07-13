@@ -1,41 +1,62 @@
 # Bloggie
 
-A full-stack blog application with a Laravel REST API backend and a React frontend. Users can sign up, log in, create/edit/delete their own posts, tag posts, and comment on any post. Posts automatically expire and are deleted 24 hours after creation.
+A Blog Application with a RESTful API built in **PHP Laravel** and a UI built in **React**.
+
+## Requirements Covered
+
+### Backend – Laravel (PHP)
+
+**1. User Authentication (Login, Signup)**
+- User fields: `name`, `email`, `password`, `image`
+- Login via email + password
+- All API endpoints except login/signup are protected with authentication
+- Image uploads stored using Laravel's filesystem (local disk)
+
+> **Deviation from spec:** the original requirement specifies JWT. This project uses **Laravel Sanctum** instead — Laravel's built-in token-based API auth package. It achieves the same result (stateless, bearer-token-protected endpoints) with less setup overhead.
+
+**2. CRUD Posts**
+- Post fields: `title`, `body`, `author` (reference to User), `tags`, `comments`
+- Users can only edit/delete their own posts
+- Users can add comments on any post
+- Users can only edit/delete their own comments
+- Users can update a post's tags
+- Every post must have at least one tag
+- All posts are automatically deleted after 24 hours, via a scheduled job (Laravel Scheduler + Queue Worker) that runs every minute and deletes expired posts
+
+### Database – MySQL
+- MySQL as the database
+- Migrations use proper keys and soft deletes
+- Indexed foreign keys and proper Eloquent relationships
+
+### UI – React
+- Login & Signup forms
+- Auth token stored in `localStorage`
+- Feed (list of posts)
+- Create/Edit/Delete Post pages
+- Add/Edit/Delete comments
+- Tags management UI (edit tags on a post)
+- UI indicator that posts expire after 24 hours
+- Communicates with the Laravel API via Axios
 
 ## Tech Stack
 
-| Layer          | Technology                                  |
-|----------------|----------------------------------------------|
-| Backend API    | Laravel 11 (PHP), Laravel Sanctum (token auth) |
-| Database       | MySQL                                        |
-| Queue / Cache  | Redis (optional locally, used in production) |
-| Frontend       | React (Vite)                                 |
-| HTTP Client    | Axios                                        |
-| Local Dev Env  | Laragon                                      |
+| Layer          | Technology                          |
+|----------------|--------------------------------------|
+| Backend API    | Laravel 11, Laravel Sanctum          |
+| Database       | MySQL                                |
+| Scheduling     | Laravel Scheduler + Queue Worker     |
+| Frontend       | React (Vite), Axios, React Router    |
+| Local Dev Env  | Laragon                              |
 
-> **Note on auth:** the original spec called for JWT; this project uses **Laravel Sanctum** instead — a lighter-weight, Laravel-native token auth package that achieves the same goal (stateless, token-protected API endpoints).
+> **Deviation from spec:** the requirements doc states the system should run via Docker Compose. This project is currently developed and run locally with Laragon (PHP/MySQL) and the Vite dev server, without Docker.
 
 ## Project Structure
 
 ```
 Bloggie/
 ├── Bloggie-API/     ← Laravel backend
-└── Bloggie-UI/       ← React frontend
+└── Bloggie-UI/      ← React frontend
 ```
-
-## Features
-
-- **Auth**: signup/login with `name`, `email`, `password`, `image`; Sanctum-issued bearer tokens; all endpoints except `/register` and `/login` are protected
-- **Posts**: full CRUD; each post has a title, body, author, tags, and comments
-- **Ownership rules**: users can only edit/delete their own posts and comments; any authenticated user can comment on any post
-- **Tags**: every post must have at least one tag; authors can update a post's tags
-- **Auto-expiry**: posts are automatically deleted 24 hours after creation via a scheduled Artisan command
-- **Image uploads**: stored via Laravel's filesystem (local disk, or S3 in production)
-
-## Prerequisites
-
-- [Laragon](https://laragon.org/) (bundles PHP, Composer, MySQL, and Node.js)
-- Git
 
 ## Backend Setup — `Bloggie-API`
 
@@ -46,7 +67,7 @@ cd Bloggie-API
 php artisan install:api
 ```
 
-Create the database `bloggie` via Laragon's Database button (HeidiSQL), then configure `.env`:
+Create a MySQL database named `bloggie` via Laragon's Database tool, then set `.env`:
 
 ```
 DB_CONNECTION=mysql
@@ -57,10 +78,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 QUEUE_CONNECTION=database
-CACHE_STORE=database
 ```
-
-Run migrations and link storage:
 
 ```bash
 php artisan key:generate
@@ -73,9 +91,9 @@ Enable CORS for the frontend:
 ```bash
 php artisan config:publish cors
 ```
-In `config/cors.php`, add your frontend's dev URL to `allowed_origins` (e.g. `http://localhost:5173`).
+Add your frontend's dev URL (e.g. `http://localhost:5173`) to `allowed_origins` in `config/cors.php`.
 
-Keep these running in separate terminals during development:
+Run these together while developing:
 
 ```bash
 php artisan serve
@@ -93,52 +111,29 @@ npm install
 npm install axios react-router-dom
 ```
 
-Create a `.env` file:
+Set `.env`:
 
 ```
 VITE_API_URL=http://localhost:8000/api
 ```
 
-Run the dev server:
-
 ```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+App runs at `http://localhost:5173`.
 
-## API Overview
+## API Endpoints
 
-| Method | Endpoint                  | Auth required | Description              |
-|--------|----------------------------|:---:|---------------------------|
-| POST   | `/api/register`            | No  | Create a new user          |
-| POST   | `/api/login`                | No  | Log in, receive a token    |
-| GET    | `/api/posts`                 | Yes | List posts                 |
-| POST   | `/api/posts`                 | Yes | Create a post               |
-| PUT    | `/api/posts/{id}`            | Yes | Update own post             |
-| DELETE | `/api/posts/{id}`            | Yes | Delete own post             |
-| POST   | `/api/posts/{id}/comments`   | Yes | Add a comment                |
-| PUT    | `/api/comments/{id}`         | Yes | Edit own comment             |
-| DELETE | `/api/comments/{id}`         | Yes | Delete own comment           |
-
-Protected routes require an `Authorization: Bearer <token>` header.
-
-## Testing
-
-```bash
-php artisan test
-```
-Covers happy and unhappy paths for signup/login, unauthorized access, and post/comment ownership rules.
-
-## Deployment
-
-- **Backend**: [Render](https://render.com) (Web Service, background worker for the queue, cron job for the scheduler)
-- **Database**: [PlanetScale](https://planetscale.com) (managed MySQL)
-- **Redis**: Render Key Value
-- **Frontend**: [Vercel](https://vercel.com)
-
-See project documentation for full deployment steps and environment variable configuration.
-
-## License
-
-This project was built as a learning/portfolio exercise.
+| Method | Endpoint                    | Auth | Description         |
+|--------|-------------------------------|:---:|-----------------------|
+| POST   | `/api/register`               | No  | Create a user          |
+| POST   | `/api/login`                    | No  | Log in, receive a token |
+| GET    | `/api/posts`                    | Yes | List posts (feed)      |
+| POST   | `/api/posts`                    | Yes | Create a post            |
+| PUT    | `/api/posts/{id}`               | Yes | Edit own post             |
+| DELETE | `/api/posts/{id}`               | Yes | Delete own post            |
+| PUT    | `/api/posts/{id}/tags`           | Yes | Update post tags            |
+| POST   | `/api/posts/{id}/comments`       | Yes | Add a comment                 |
+| PUT    | `/api/comments/{id}`             | Yes | Edit own comment               |
+| DELETE | `/api/comments/{id}`             | Yes | Delete own comment              |
