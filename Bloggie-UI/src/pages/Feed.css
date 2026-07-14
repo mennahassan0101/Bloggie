@@ -1,0 +1,23 @@
+.feed-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+.feed-page h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+.feed-page p {
+  font-family: 'Lora', serif;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+.feed-page .card {
+  margin-top: 24px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
