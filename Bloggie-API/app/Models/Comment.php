@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
 {
-       use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'content',
-        'post_id',
-        'user_id',
-    ];
+    protected $fillable = ['post_id', 'user_id', 'body'];
 
-    public function user()
+    public function author()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function post()
