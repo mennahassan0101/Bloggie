@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Password;
+
 
 class AuthController extends Controller
 {
@@ -100,5 +102,83 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully',
         ]);
+    }
+        public function forgotPassword(Request $request)
+    {
+        // Validate the email
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Send the password reset link
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        // Check if the email was sent
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => 'Password reset link sent to your email',
+                'status' => $status,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Unable to send reset link',
+            'status' => $status,
+        ], 500);
+    }
+
+    /**
+     * Reset password using token
+     */
+    public function resetPassword(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|exists:users,email',
+            'token' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Reset the password
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->save();
+
+                // Delete all user tokens (optional - forces re-login)
+                // $user->tokens()->delete();
+            }
+        );
+
+        // Check if password was reset
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Password reset successfully',
+                'status' => $status,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Unable to reset password',
+            'status' => $status,
+        ], 500);
     }
 }
