@@ -9,6 +9,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -74,7 +75,10 @@ class PostController extends Controller
             ->map(fn ($name) => trim($name))
             ->filter()
             ->unique()
-            ->map(fn ($name) => Tag::firstOrCreate(['name' => $name])->id);
+            ->map(fn ($name) => Tag::firstOrCreate(
+                ['name' => $name],
+                ['slug' => Str::slug($name)]
+            )->id);
 
         $post->tags()->sync($tagIds);
     }
