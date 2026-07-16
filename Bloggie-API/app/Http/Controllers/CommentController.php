@@ -8,9 +8,11 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
-
+use App\Events\CommentCreated;
 class CommentController extends Controller
 {
+
+
     public function store(StoreCommentRequest $request, Post $post)
     {
         $comment = $post->comments()->create([
@@ -19,6 +21,8 @@ class CommentController extends Controller
         ]);
 
         $comment->load('author');
+
+        CommentCreated::dispatch($comment);
 
         return new CommentResource($comment);
     }
