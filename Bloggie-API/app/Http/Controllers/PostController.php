@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+ 
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Requests\UpdatePostTagsRequest;
@@ -9,6 +9,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -25,15 +26,18 @@ class PostController extends Controller
 
     public function store(StorePostRequest $request)
     {
-        $post = $request->user()->posts()->create([
-            'title' => $request->title,
-            'body' => $request->body,
-        ]);
+        $post = DB::transaction(function () use ($request) {
+            $post = $request->user()->posts()->create([
+                'title' => $request->title,
+                'body' => $request->body,
+            ]);
 
-        $this->syncTags($post, $request->tags);
+            $this->syncTags($post, $request->tags);
+
+            return $post;
+        });
 
         $post->load(['author', 'tags']);
-
         return new PostResource($post);
     }
 
@@ -63,9 +67,12 @@ class PostController extends Controller
 
     public function updateTags(UpdatePostTagsRequest $request, Post $post)
     {
-        $this->syncTags($post, $request->tags);
+        DB::transaction(function () use ($request, $post) {
+            $this->syncTags($post, $request->tags);
+        });
+ 
         $post->load(['author', 'tags']);
-
+ 
         return new PostResource($post);
     }
 
