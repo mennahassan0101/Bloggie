@@ -18,7 +18,7 @@ class PostController extends Controller
         $posts = Post::with(['author', 'tags'])
             ->withCount('comments')
             ->latest()
-            ->paginate(10);
+            ->paginate(2);
 
         return PostResource::collection($posts);
     }
