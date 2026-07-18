@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 function initials(name = '') {
@@ -25,6 +26,7 @@ export default function Navbar() {
         </NavLink>
       </div>
       <div className="nav-cta">
+        <NotificationBell />
         <div className="avatar" style={{ background: 'var(--sage)' }}>
           {user?.image ? (
             <img src={user.image} alt={user.name} />

@@ -1,0 +1,43 @@
+.tag-input {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.tag-input:focus-within {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 4px var(--sage-soft);
+}
+
+.tag-input-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+/* override the global input[type=text] rules from theme.css — this input
+   lives inside the chip row, not as a full-width standalone field */
+.tag-input-chips input[type='text'] {
+  all: unset;
+  flex: 1 1 120px;
+  font-size: 13px;
+  padding: 4px 2px;
+  color: var(--ink);
+}
+
+.tag-chip-removable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tag-chip-removable button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-2);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}

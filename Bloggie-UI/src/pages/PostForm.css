@@ -1,0 +1,48 @@
+.post-form-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 48px 24px 84px;
+}
+
+.post-form-card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 28px rgba(110, 100, 60, 0.08);
+  padding: 40px;
+}
+.post-form-card h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0 0 6px;
+}
+.post-form-card .sub {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 28px;
+}
+
+.post-form-card textarea {
+  resize: vertical;
+  min-height: 200px;
+  font-family: 'Lora', serif;
+  line-height: 1.6;
+}
+
+.post-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.post-form-state {
+  text-align: center;
+  color: var(--ink-faint);
+  padding: 60px 24px;
+  width: 100%;
+}
